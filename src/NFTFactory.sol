@@ -195,10 +195,10 @@ contract NFTFactory is ReentrancyGuard, Ownable, AutomationCompatible {
     }
     
     function performUpkeep(bytes calldata /* performData */) external override {
-        // 确保活动已结束
-        // if (block.timestamp < activityEndTime) {
-        //     return;
-        // }
+        确保活动已结束
+        if (block.timestamp < activityEndTime) {
+            return;
+        }
         
         uint256 currentTeamCount = teamNFT._teamIdCounter();
         uint256 dissolvedTeamsCount = 0;
