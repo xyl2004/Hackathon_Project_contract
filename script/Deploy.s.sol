@@ -7,7 +7,7 @@ import {console} from "forge-std/console.sol";
 contract Deploy is Script {
     function run() public {
         vm.startBroadcast();
-        NFTFactory factory = new NFTFactory(600);
+        NFTFactory factory = new NFTFactory(1000000000000);
         console.log("NFTFactory deployed at:", address(factory));
         vm.stopBroadcast();
     }

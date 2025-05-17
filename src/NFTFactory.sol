@@ -49,9 +49,8 @@ contract NFTFactory is ReentrancyGuard, Ownable, AutomationCompatible {
     );
  
     event TeamURIsUpdated(
-        uint256 indexed teamId,
-        string teamName,
-        uint256[] memberIds
+        uint256 indexed memberId,
+        string tokenURI
     );
     
     event TeamDissolved(
@@ -73,28 +72,45 @@ contract NFTFactory is ReentrancyGuard, Ownable, AutomationCompatible {
 
     // 创建新队伍
     function createTeam(
-        string memory name,
-        string memory tokenURI
+        string memory teamName,
+        string memory teamURI,
+        string memory memberName,
+        string memory memberURI,
+        uint256 role
     ) external payable nonReentrant returns (uint256) {    
         if (msg.value != STAKE_AMOUNT) {
             revert IncorrectStakeAmount();
         }
 
-        uint256 teamId = teamNFT.mint(msg.sender, name, tokenURI);
+        uint256 teamId = teamNFT.mint(msg.sender, teamName, teamURI);
         teamStakes[teamId] = msg.value;
 
-        emit TeamCreated(msg.sender, teamId, name, tokenURI);
+        emit TeamCreated(msg.sender, teamId, teamName, teamURI);
+
+        // 添加队长的成员NFT
+        _addMember(msg.sender, teamId, memberName, role, memberURI);
+
         return teamId;
     }
-
-    // 添加队伍成员NFT
+// 添加队伍成员NFT
     function addMember(
+        uint256 teamId,
+        address member,
+        string memory memberName,
+        uint256 role,
+        string memory memberURI
+    ) external nonReentrant {
+        _addMember(member, teamId, memberName, role, memberURI);
+    }
+
+    
+    function _addMember(
         address member,
         uint256 teamId,
         string memory name,
         uint256 role,
         string memory tokenURI
-    ) external nonReentrant {
+    ) internal {
         
         if (teamNFT.ownerOf(teamId) != msg.sender) {
             revert UnauthorizedCaptain();
@@ -106,24 +122,11 @@ contract NFTFactory is ReentrancyGuard, Ownable, AutomationCompatible {
         emit MemberAdded(member, teamId, name, role, memberId, tokenURI);
     }
 
-    // 添加队长的成员NFT
-    function addMemberNFTself(
-        uint256 teamId,
-        string memory name,
-        uint256 role,
-        string memory tokenURI
-    ) external nonReentrant {
-        if (teamNFT.ownerOf(teamId) != msg.sender) {
-            revert UnauthorizedCaptain();
-        }
-        uint256 memberId = memberNFT.mint(msg.sender, teamId, name, role, tokenURI);
-        teamMemberIds[teamId].push(memberId);
-    }
+   
 
     // 批量更新队伍成员的tokenURI
     function updateTeamMemberURIs(
         uint256 teamId,
-        string memory teamName,
         string[] memory newTokenURIs
     ) external nonReentrant onlyOwner {
         uint256[] memory memberIds = teamMemberIds[teamId];
@@ -136,10 +139,11 @@ contract NFTFactory is ReentrancyGuard, Ownable, AutomationCompatible {
         // 批量更新每个成员的tokenURI
         for (uint256 i = 0; i < memberIds.length; i++) {
             memberNFT.updateTokenURI(memberIds[i], newTokenURIs[i]);
+            emit TeamURIsUpdated(memberIds[i], newTokenURIs[i]);
         }
         
         // 触发事件
-        emit TeamURIsUpdated(teamId, teamName, memberIds);
+       
     }
     
     // 获取队伍所有成员ID
@@ -192,9 +196,9 @@ contract NFTFactory is ReentrancyGuard, Ownable, AutomationCompatible {
     
     function performUpkeep(bytes calldata /* performData */) external override {
         // 确保活动已结束
-        if (block.timestamp < activityEndTime) {
-            return;
-        }
+        // if (block.timestamp < activityEndTime) {
+        //     return;
+        // }
         
         uint256 currentTeamCount = teamNFT._teamIdCounter();
         uint256 dissolvedTeamsCount = 0;

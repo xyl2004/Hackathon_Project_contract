@@ -58,7 +58,7 @@ contract MemberNFT is ERC721, ERC721URIStorage, ReentrancyGuard, Ownable {
         address,
         address,
         uint256
-    ) public override(ERC721, IERC721) {
+    ) public override (ERC721, IERC721) {
         revert MemberNFT__SoulboundToken();
     }
 

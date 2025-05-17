@@ -50,7 +50,7 @@ deploy-sepolia:
 
 # 部署到Sepolia测试网并验证合约
 deploy-sepolia-verify:
-	forge script script/Deploy.s.sol:Deploy --rpc-url $(SEPOLIA_RPC_URL) --private-key $(PRIVATE_KEY) --broadcast --verify --etherscan-api-key $(ETHERSCAN_API_KEY)
+	forge script script/Deploy.s.sol:Deploy --rpc-url ${SEPOLIA_RPC_URL} --private-key ${PRIVATE_KEY} --broadcast --verify --etherscan-api-key ${ETHERSCAN_API_KEY}
 
 # 检查合约大小
 check-size:
