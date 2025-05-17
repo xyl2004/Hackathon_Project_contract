@@ -195,7 +195,7 @@ contract NFTFactory is ReentrancyGuard, Ownable, AutomationCompatible {
     }
     
     function performUpkeep(bytes calldata /* performData */) external override {
-        确保活动已结束
+       // 确保活动已结束
         if (block.timestamp < activityEndTime) {
             return;
         }
