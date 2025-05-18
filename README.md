@@ -1,12 +1,12 @@
 # NFT活动平台智能合约
 
-本项目是一个基于以太坊的NFT活动平台智能合约，使用Foundry框架开发。该平台允许创建和管理NFT奖励活动，支持自动化抽奖和NFT分发。
+本项目是一个基于以太坊的NFT活动平台智能合约，使用Foundry框架开发。该平台允许创建和管理NFT奖励活动，支持自动化销毁NFT和退还ETH。
 
 ## 项目特点
 
 - **NFT铸造**：支持创建和铸造定制化NFT
 - **活动管理**：设置活动时间、参与条件和奖励分配
-- **自动抽奖**：集成Chainlink自动化功能，保证抽奖公平性
+- **自动处理**：集成Chainlink自动化功能，在活动结束后自动销毁队伍NFT并退还ETH
 - **权限控制**：完善的权限管理机制
 - **可扩展性**：模块化设计，易于扩展
 
@@ -76,6 +76,27 @@ $ make deploy-sepolia
 ```shell
 $ forge script script/Deploy.s.sol:DeployScript --rpc-url $RPC_URL --private-key $PRIVATE_KEY --broadcast --verify
 ```
+
+## 配置Chainlink Automation
+
+合约部署后，需要在Chainlink Automation服务上注册以启用活动结束后自动销毁队伍NFT并退还ETH的功能：
+
+1. 访问[Chainlink Automation](https://automation.chain.link/)并连接钱包
+2. 点击"Register new Upkeep"
+3. 选择"Custom Logic"
+4. 填写以下信息：
+   - Upkeep名称：`NFTFactoryAutomation`（或您喜欢的任何名称）
+   - 合约地址：部署的`NFTFactory`合约地址
+   - Gas限制：500000
+   - 启动资金：2-5 LINK（取决于您预期的运行频率）
+5. 确认并支付LINK代币注册费用
+6. 完成注册后，Chainlink节点将定期调用您合约的`checkUpkeep`函数，并在活动结束时触发`performUpkeep`自动销毁队伍NFT并退还ETH
+
+### 验证Automation设置
+
+1. 在Chainlink Automation控制面板上，找到您注册的Upkeep
+2. 查看"History"选项卡，确认是否有执行记录
+3. 您也可以通过合约事件日志查看自动销毁和退款的执行情况
 
 ## 使用Makefile
 
